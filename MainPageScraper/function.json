@@ -2,7 +2,7 @@
   "scriptFile": "__init__.py",
   "bindings": [
     {
-      "name": "url",
+      "name": "notUsed",
       "type": "activityTrigger",
       "direction": "in"
     }
