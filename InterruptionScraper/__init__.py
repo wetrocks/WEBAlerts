@@ -1,35 +1,73 @@
 import datetime
+import json
 import logging
+import os
+import pathlib
+from urllib.parse import urlparse
 
 import azure.functions as func
-from lxml import html
-from lxml import etree
 import requests
-import json
+from azure.cosmos import CosmosClient
+from lxml import etree, html
+import datetime
 
 
 
-def main(url: str) -> dict:
-   # url = "https://www.webbonaire.com/en/announcement-electricity-interruption-thursday-february-18th-2021/"
- 
-    page_repsonse = requests.get(url)
+def get_container_client():
+    conn_str = os.environ["ConnectionStrings:CosmosDBConnection"]
+
+    client = CosmosClient.from_connection_string(conn_str) \
+                         .get_database_client("webalert_dev") \
+                         .get_container_client("notifications")
+
+    return client
+
+def scrape_content(interruption_url: str) -> str:
+    page_repsonse = requests.get(interruption_url)
     page_repsonse.raise_for_status()
-
+    
     page_tree = html.fromstring(page_repsonse.content)
     main_element = page_tree.xpath('body//main[1]')
     if len(main_element) != 1:
         logging.warning("No main element found")
-        return
-
+        return ""
+    
     main_element = main_element[0]
     title = "".join(main_element.xpath('h1[1]/text()'))
-
-    interruption = {
-        "url": url,
-        "title": title,
-        "content": str(etree.tostring(main_element))
-    }
-
-    return interruption
+    return str(etree.tostring(main_element))
 
 
+PARTITION_KEY_VAL = "interruption"
+container_client = get_container_client()
+    
+def main(url: str) -> dict:
+
+    # get id from end of url
+    docId = pathlib.PurePosixPath(urlparse(url).path).parts[-1]
+
+    # check if exists in db
+    dbItem = container_client.query_items(
+        query='SELECT * FROM notifications p WHERE p.id = @docId',
+        parameters=[dict(name="@docId", value=docId)],
+        partition_key=PARTITION_KEY_VAL,
+        max_item_count=1
+    )
+
+    returnVal = { "url": url }
+    if any(dbItem):
+        returnVal["created"] = False
+    else:
+        pageContent = scrape_content(url)
+
+        newItem = {
+            "id": docId,
+            "notificationType": PARTITION_KEY_VAL,
+            "created": datetime.datetime.utcnow().isoformat(),
+            "content": pageContent
+        }
+
+        container_client.create_item(newItem)
+        
+        returnVal["created"] = True
+
+    return returnVal
