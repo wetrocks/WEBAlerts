@@ -14,7 +14,7 @@ import datetime
 
 
 def get_container_client():
-    conn_str = os.environ["ConnectionStrings:CosmosDBConnection"]
+    conn_str = os.environ["DBConnection"]
 
     client = CosmosClient.from_connection_string(conn_str) \
                          .get_database_client("webalert_dev") \
