@@ -5,4 +5,4 @@ azure-functions-durable>=1.0.0b12
 lxml
 requests
 azure-cosmos
-
+sendgrid
