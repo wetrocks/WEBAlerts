@@ -5,6 +5,7 @@
 
 trigger:
 - master
+- feature/*
 
 variables:
   # Azure Resource Manager connection created during pipeline creation
@@ -53,7 +54,13 @@ stages:
         pip install pytest
         pip install pytest-cov
         pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
-        displayName: 'Test with pytest'
+      displayName: 'Test with pytest'
+
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: '**/test-*.xml'
+        testRunTitle: 'Publish test results for Python $(python.version)'
 
     - task: ArchiveFiles@2
       displayName: 'Archive files'
