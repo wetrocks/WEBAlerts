@@ -10,7 +10,7 @@ import requests
 from azure.cosmos import CosmosClient
 from lxml import etree, html
 import datetime
-
+from shared_code import html_helper
 
 
 def get_container_client():
@@ -25,16 +25,7 @@ def get_container_client():
 def scrape_content(interruption_url: str) -> str:
     page_repsonse = requests.get(interruption_url)
     page_repsonse.raise_for_status()
-    
-    page_tree = html.fromstring(page_repsonse.content)
-    main_element = page_tree.xpath('body//main[1]')
-    if len(main_element) != 1:
-        logging.warning("No main element found")
-        return ""
-    
-    main_element = main_element[0]
-    title = "".join(main_element.xpath('h1[1]/text()'))
-    return str(etree.tostring(main_element))
+    html_helper.extract_interruption_info(page_repsonse.content)
 
 
 PARTITION_KEY_VAL = "interruption"
