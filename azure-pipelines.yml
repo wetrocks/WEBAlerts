@@ -46,6 +46,7 @@ stages:
     - bash: |
         python -m venv worker_venv
         source worker_venv/bin/activate
+        pip install --upgrade pip
         pip install -r requirements.txt
       workingDirectory: $(workingDirectory)
       displayName: 'Install application dependencies'
