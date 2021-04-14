@@ -46,10 +46,13 @@ stages:
     - bash: |
         python -m venv worker_venv
         source worker_venv/bin/activate
-        pip install --upgrade pip
-        pip install -r requirements.txt
       workingDirectory: $(workingDirectory)
-      displayName: 'Install application dependencies'
+      displayName: 'Setup venv'
+
+    - script: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r requirements.txt
+      displayName: 'Install tools and dependencies'
 
     - script: |
         pip install pytest
