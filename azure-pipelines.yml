@@ -11,7 +11,7 @@ variables:
   azureSubscription: '5161c4f6-47a8-4457-9c9f-304a4b7072e6'
 
   # Function app name
-  functionAppName: 'webalerts'
+  functionAppName: 'webinterruptions'
 
   # Agent VM image name
   vmImageName: 'ubuntu:18.04'
