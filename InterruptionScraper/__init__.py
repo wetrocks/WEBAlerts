@@ -12,12 +12,13 @@ from lxml import etree, html
 import datetime
 from shared_code import html_helper
 
+db_name = "cosmos-notificationdb"
 
 def get_container_client():
     conn_str = os.environ["DBConnection"]
 
     client = CosmosClient.from_connection_string(conn_str) \
-                         .get_database_client("webalert_dev") \
+                         .get_database_client(db_name) \
                          .get_container_client("notifications")
 
     return client
@@ -25,7 +26,7 @@ def get_container_client():
 def scrape_content(interruption_url: str) -> str:
     page_repsonse = requests.get(interruption_url)
     page_repsonse.raise_for_status()
-    html_helper.extract_interruption_info(page_repsonse.content)
+    return html_helper.extract_interruption_info(page_repsonse.content)
 
 
 PARTITION_KEY_VAL = "interruption"
@@ -54,9 +55,10 @@ def main(url: str) -> dict:
             "id": docId,
             "notificationType": PARTITION_KEY_VAL,
             "created": datetime.datetime.utcnow().isoformat(),
-            "content": pageContent
+            "title": pageContent["title"],
+            "content": pageContent["content"]
         }
-
+#todo: in case something happens, write to db anyway w/ error or something
         container_client.create_item(newItem)
         
         returnVal["created"] = True

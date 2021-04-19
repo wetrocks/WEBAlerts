@@ -7,7 +7,7 @@
       "direction": "in",
       "leaseCollectionName": "leases",
       "connectionStringSetting": "DBConnection",
-      "databaseName": "webalert_dev",
+      "databaseName": "cosmos-notificationdb",
       "collectionName": "notifications",
       "createLeaseCollectionIfNotExists": "true"
     }

@@ -1,0 +1,273 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "appName": {
+        "type": "string",
+        "metadata": {
+          "description": "The name of the function app that you wish to create."
+        }
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Location for all resources."
+        }
+      }
+    },
+    "variables": {
+      "functionAppName": "[concat('func-', parameters('appName'))]",
+      "functionWorkerRuntime": "python",
+      "hostingPlanName": "[concat('plan-', parameters('appName'))]",
+      "applicationInsightsName": "[concat('appi-', parameters('appName'))]",
+      "storageAccountName": "[concat('st4', parameters('appName'))]",
+      "storeageAccountType": "Standard_LRS",
+      "dbAccountName": "[concat('dbacct-', parameters('appName'))]",
+      "dbName": "cosmos-notificationdb"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2019-06-01",
+        "name": "[variables('storageAccountName')]",
+        "location": "[parameters('location')]",
+        "sku": {
+          "name": "[variables('storeageAccountType')]"
+        },
+        "kind": "StorageV2"
+      },
+      {
+        "type": "Microsoft.Web/serverfarms",
+        "apiVersion": "2018-02-01",
+        "name": "[variables('hostingPlanName')]",
+        "location": "[parameters('location')]",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y",
+                "capacity": 0
+            },
+            "kind": "functionapp",
+            "properties": {
+                "perSiteScaling": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+      },
+      {
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2018-11-01",
+        "name": "[variables('functionAppName')]",
+        "location": "[parameters('location')]",
+        "kind": "functionapp,linux",
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        ],
+        "properties": {
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+          "siteConfig": {
+            "appSettings": [
+              {
+                "name": "FUNCTIONS_WORKER_RUNTIME",
+                "value": "[variables('functionWorkerRuntime')]"
+              },              
+              {
+                "name": "FUNCTIONS_EXTENSION_VERSION",
+                "value": "~3"
+              },
+              {
+                "name": "AzureWebJobsStorage",
+                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';EndpointSuffix=', environment().suffixes.storage, ';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value)]"
+              },
+              {
+                "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';EndpointSuffix=', environment().suffixes.storage, ';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value)]"
+              },
+              {
+                "name": "WEBSITE_CONTENTSHARE",
+                "value": "[toLower(variables('functionAppName'))]"
+              },
+              {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "[reference(resourceId('microsoft.insights/components', variables('applicationInsightsName')), '2020-02-02-preview').InstrumentationKey]"
+              }
+            ]
+          }
+        }
+      },
+      {
+          "type": "Microsoft.DocumentDB/databaseAccounts",
+          "apiVersion": "2021-03-01-preview",
+          "name": "[variables('dbAccountName')]",
+          "location": "[parameters('location')]",
+          "tags": {
+              "defaultExperience": "Core (SQL)",
+              "hidden-cosmos-mmspecial": "",
+              "CosmosAccountType": "Non-Production"
+          },
+          "kind": "GlobalDocumentDB",
+          "identity": {
+              "type": "None"
+          },
+          "properties": {
+              "publicNetworkAccess": "Enabled",
+              "enableAutomaticFailover": false,
+              "enableMultipleWriteLocations": false,
+              "isVirtualNetworkFilterEnabled": false,
+              "virtualNetworkRules": [],
+              "disableKeyBasedMetadataWriteAccess": false,
+              "enableFreeTier": false,
+              "enableAnalyticalStorage": false,
+              "createMode": "Default",
+              "databaseAccountOfferType": "Standard",
+              "networkAclBypass": "None",
+              "consistencyPolicy": {
+                  "defaultConsistencyLevel": "Session",
+                  "maxIntervalInSeconds": 5,
+                  "maxStalenessPrefix": 100
+              },
+              "locations": [
+                  {
+                      "locationName": "[parameters('location')]",
+                      "failoverPriority": 0,
+                      "isZoneRedundant": false
+                  }
+              ],
+              "cors": [],
+              "capabilities": [
+                  {
+                      "name": "EnableServerless"
+                  }
+              ],
+              "ipRules": [],
+              "backupPolicy": {
+                  "type": "Periodic",
+                  "periodicModeProperties": {
+                      "backupIntervalInMinutes": 240,
+                      "backupRetentionIntervalInHours": 8,
+                      "backupStorageRedundancy": "Geo"
+                  }
+              },
+              "networkAclBypassResourceIds": []
+          }
+      },
+      {
+          "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+          "apiVersion": "2021-03-01-preview",
+          "name": "[concat(variables('dbAccountName'), '/', variables('dbName'))]", 
+          "dependsOn": [
+              "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('dbAccountName'))]"
+          ],
+          "properties": {
+              "resource": {
+                  "id": "cosmos-notificationdb"
+              }
+          }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+            "apiVersion": "2021-03-01-preview",
+            "name": "[concat(variables('dbAccountName'), '/', variables('dbName'), '/leases' )]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('dbAccountName'), variables('dbName'))]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('dbAccountName'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "leases",
+                    "indexingPolicy": {
+                        "indexingMode": "consistent",
+                        "automatic": true,
+                        "includedPaths": [
+                            {
+                                "path": "/*"
+                            }
+                        ],
+                        "excludedPaths": [
+                            {
+                                "path": "/\"_etag\"/?"
+                            }
+                        ]
+                    },
+                    "partitionKey": {
+                        "paths": [
+                            "/id"
+                        ],
+                        "kind": "Hash"
+                    },
+                    "uniqueKeyPolicy": {
+                        "uniqueKeys": []
+                    },
+                    "conflictResolutionPolicy": {
+                        "mode": "LastWriterWins",
+                        "conflictResolutionPath": "/_ts"
+                    }
+                }
+            }
+        },
+        {
+          "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+          "apiVersion": "2021-03-01-preview",
+          "name": "[concat(variables('dbAccountName'), '/', variables('dbName'), '/notifications' )]",
+          "dependsOn": [
+              "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('dbAccountName'), variables('dbName'))]",
+              "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('dbAccountName'))]"
+          ],
+          "properties": {
+              "resource": {
+                  "id": "notifications",
+                  "indexingPolicy": {
+                      "indexingMode": "consistent",
+                      "automatic": true,
+                      "includedPaths": [
+                          {
+                              "path": "/*"
+                          }
+                      ],
+                      "excludedPaths": [
+                          {
+                              "path": "/\"_etag\"/?"
+                          }
+                      ]
+                  },
+                  "partitionKey": {
+                      "paths": [
+                          "/notificationType"
+                      ],
+                      "kind": "Hash"
+                  },
+                  "uniqueKeyPolicy": {
+                      "uniqueKeys": []
+                  },
+                  "conflictResolutionPolicy": {
+                      "mode": "LastWriterWins",
+                      "conflictResolutionPath": "/_ts"
+                  }
+              }
+          }
+      },
+      {
+        "type": "microsoft.insights/components",
+        "apiVersion": "2020-02-02-preview",
+        "name": "[variables('applicationInsightsName')]",
+        "location": "[resourceGroup().location]",
+        "kind": "web",
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('applicationInsightsName')))]": "Resource"
+        },
+        "properties": {
+          "ApplicationId": "[variables('applicationInsightsName')]",
+          "Application_Type": "web",
+          "Request_Source": "rest"
+        }
+      }
+    ]
+  }
