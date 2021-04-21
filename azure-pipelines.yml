@@ -27,6 +27,8 @@ stages:
   - job: Build
     displayName: Build
     pool: Default
+    workspace:
+      clean: all
 
     steps:
     - bash: |
@@ -96,7 +98,6 @@ stages:
     strategy:
       runOnce:
         deploy:
-
           steps:
           - task: AzureFunctionApp@1
             displayName: 'Azure functions app deploy'
@@ -104,4 +105,4 @@ stages:
               azureSubscription: '$(azureSubscription)'
               appType: functionAppLinux
               appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              package: '$(Pipeline.Workspace)/drop/build$(Build.BuildId).zip'
