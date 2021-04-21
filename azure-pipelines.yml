@@ -38,20 +38,18 @@ stages:
       displayName: 'Build extensions'
 
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.7'
+      displayName: "Setting python version to 3.7 as required by functions"
       inputs:
-        versionSpec: 3.7 # Functions V2 supports Python 3.6 as of today
-
+        versionSpec: '3.7'
+        architecture: 'x64'
+    
     - bash: |
-        python -m venv worker_venv
-        source worker_venv/bin/activate
-      workingDirectory: $(workingDirectory)
-      displayName: 'Setup venv'
-
-    - script: |
-        pip install --upgrade pip setuptools wheel
-        pip install -r requirements.txt
-      displayName: 'Install tools and dependencies'
+        if [ -f extensions.csproj ]
+        then
+            dotnet build extensions.csproj --output ./bin
+        fi
+        pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
+      displayName: 'Install tools and dependencies'  
 
     - script: |
         pip install pytest
