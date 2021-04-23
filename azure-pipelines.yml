@@ -72,12 +72,19 @@ stages:
         reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'     
 
     - task: CopyFiles@2
-      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory) '
+      displayName: 'Copy code to: $(Build.ArtifactStagingDirectory) '
       inputs:
         SourceFolder: '$(System.DefaultWorkingDirectory)/app'
         Contents: |
           **/*
-          ../requirements.txt
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: CopyFiles@2
+      displayName: 'Copy requirements.txt to: $(Build.ArtifactStagingDirectory) '
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: |
+          requirements.txt
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
     - task: ArchiveFiles@2
@@ -89,7 +96,7 @@ stages:
     
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+        PathtoPublish: '$(System.ArtifactStagingDirectory)/build$(Build.BuildId).zip'
         artifactName: 'drop'
 
 
