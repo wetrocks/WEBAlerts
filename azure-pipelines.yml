@@ -71,10 +71,19 @@ stages:
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
         reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'     
 
-    - task: ArchiveFiles@2
-      displayName: "Archive files"
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory) '
       inputs:
-        rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: |
+          app/**
+          requirements.txt
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: ArchiveFiles@2
+      displayName: "Create deployment zip"
+      inputs:
+        rootFolderOrFile: "$(System.ArtifactStagingDirectory)"
         includeRootFolder: false
         archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
     
