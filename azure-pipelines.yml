@@ -8,7 +8,7 @@ trigger:
 
 variables:
   # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: '4c9024a6-ea08-4353-9e94-a8b31535a969'
+  azureSubscription: 'rg-webnotifications'
 
   # Function app name
   functionAppName: 'func-webnotifications'
