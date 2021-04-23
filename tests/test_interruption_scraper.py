@@ -1,4 +1,4 @@
-from shared_code import html_helper
+from app.shared_code import html_helper
 from lxml import etree, html
 
 class TestInterruptionScraper:
