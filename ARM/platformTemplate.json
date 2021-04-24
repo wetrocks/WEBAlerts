@@ -14,6 +14,24 @@
         "metadata": {
           "description": "Location for all resources."
         }
+      },
+      "sendGridApiKey": {
+        "type": "secureString",
+        "metadata": {
+          "description": "SendGrid API Key"
+        }
+      },
+      "sendGridSenderId": {
+        "type": "secureString",
+        "metadata": {
+          "description": "SendGrid sender Id"
+        }
+      },
+      "sendGridSuppressionGroupId": {
+        "type": "secureString",
+        "metadata": {
+          "description": "SendGrid Suppression Group Id"
+        }
       }
     },
     "variables": {
@@ -98,6 +116,18 @@
               {
                 "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
                 "value": "[reference(resourceId('microsoft.insights/components', variables('applicationInsightsName')), '2020-02-02-preview').InstrumentationKey]"
+              },
+              {
+                "name": "SENDGRID_API_KEY",
+                "value": "[parameters('sendGridApiKey')]"
+              },
+              {
+                "name": "SENDGRID_SENDER_ID",
+                "value": "[parameters('sendGridSenderId')]"
+              },
+              {
+                "name": "SENDGRID_SUPPGRP_ID",
+                "value": "[parameters('sendGridSuppressionGroupId')]"
               }
             ]
           }
