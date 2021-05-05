@@ -1,4 +1,4 @@
-from app.shared_code import html_helper
+from shared_code import html_helper
 from lxml import etree, html
 
 class TestInterruptionScraper:
@@ -14,7 +14,7 @@ class TestInterruptionScraper:
             <main role="main">
                 {title_element}
                 <p>Usually summary with location:</p>
-                <p><strong>Date:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Saturday&nbsp; march 27<sup>th &nbsp;</sup> to Friday April 23<sup>rd</sup></strong><strong>, 2021</strong></p>
+                <p><strong>Date:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Saturday&nbsp; march 27<sup>th&nbsp;</sup> to Friday April 23<sup>rd</sup></strong><strong>, 2021</strong></p>
                 <p><strong>Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 06:00 </strong><strong>in the morning </strong><strong>– 19:00 </strong><strong>o’clock in the evening</strong></p>
                 <p>Details about interruption</p>
                 <p>More details...</p>
@@ -25,6 +25,36 @@ class TestInterruptionScraper:
             </div>
             <footer>...</footer>
         </html>'''
+
+    def test_date_formatting(self):
+        html_str = self.int_html.format(title_element="<h1>Title Text</h1>")
+
+        info = html_helper.extract_interruption_info(html_str)
+
+        html_tree = html.fromstring(info["content"])
+        
+        date_element = html_tree.xpath("//main/p[contains(string(), 'Date:')]")
+
+        date_str = etree.tostring(date_element[0], encoding=str)
+
+        expectedDate = "<p><strong>Date: Saturday march 27<sup>th</sup> to Friday April 23<sup>rd</sup></strong><strong>, 2021</strong></p>"
+
+        assert expectedDate == date_str
+
+    def test_time_formatting(self):
+        html_str = self.int_html.format(title_element="<h1>Title Text</h1>")
+
+        info = html_helper.extract_interruption_info(html_str)
+
+        html_tree = html.fromstring(info["content"])
+        
+        time_element = html_tree.xpath("//main/p[contains(string(), 'Time:')]")
+
+        time_str = etree.tostring(time_element[0], encoding=str)
+
+        expectedTime = "<p><strong>Time: 06:00 </strong><strong>in the morning </strong><strong>– 19:00 </strong><strong>o’clock in the evening</strong></p>"
+
+        assert expectedTime == time_str
 
     def test_extract_title(self):
         html_str = self.int_html.format(title_element="<h1>Title Text</h1>")
@@ -61,3 +91,5 @@ class TestInterruptionScraper:
         info = html_helper.extract_interruption_info(html_str)
         
         assert 0 == len(html.fromstring(info["content"]).xpath(xpathq))
+
+

@@ -2,7 +2,11 @@ from lxml import etree, html
 import logging
 
 def extract_interruption_info(htmlstr: str) -> dict:
-    page_tree = html.fromstring(htmlstr)
+    
+    # html parser doesn't seem to allow resolving entities
+    parser = etree.XMLParser(recover=True, remove_blank_text=True, remove_comments=True, resolve_entities=True)
+   
+    page_tree = etree.HTML(htmlstr, parser)
     main_element = page_tree.xpath("body//main[1]")
     if len(main_element) != 1:
         logging.warning("No main element found")

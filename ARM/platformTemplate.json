@@ -87,7 +87,8 @@
         "kind": "functionapp,linux",
         "dependsOn": [
           "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
-          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+          "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('dbAccountName'))]"
         ],
         "properties": {
           "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
@@ -128,6 +129,16 @@
               {
                 "name": "SENDGRID_SUPPGRP_ID",
                 "value": "[parameters('sendGridSuppressionGroupId')]"
+              },
+              {
+                "name": "DBConnection",
+                "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('dbAccountName')), '2019-12-12').connectionStrings[0].connectionString]"
+              }
+            ],
+            "connectionStrings": [
+              {
+                "name": "DBConnection",
+                "connectionString": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('dbAccountName')), '2019-12-12').connectionStrings[0].connectionString]"
               }
             ]
           }
