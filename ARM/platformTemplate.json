@@ -107,14 +107,6 @@
                 "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';EndpointSuffix=', environment().suffixes.storage, ';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value)]"
               },
               {
-                "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';EndpointSuffix=', environment().suffixes.storage, ';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value)]"
-              },
-              {
-                "name": "WEBSITE_CONTENTSHARE",
-                "value": "[toLower(variables('functionAppName'))]"
-              },
-              {
                 "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
                 "value": "[reference(resourceId('microsoft.insights/components', variables('applicationInsightsName')), '2020-02-02-preview').InstrumentationKey]"
               },

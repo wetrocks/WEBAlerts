@@ -74,17 +74,14 @@ stages:
     - task: CopyFiles@2
       displayName: 'Copy code to: $(Build.ArtifactStagingDirectory) '
       inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)/app'
-        Contents: |
-          **/*
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-    - task: CopyFiles@2
-      displayName: 'Copy requirements.txt to: $(Build.ArtifactStagingDirectory) '
-      inputs:
         SourceFolder: '$(System.DefaultWorkingDirectory)'
         Contents: |
-          requirements.txt
+          **/*
+          !.git/**/*
+          !tests/**/*
+          !.*
+          !.*/**
+          !ARM/**/*
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
     - task: ArchiveFiles@2
