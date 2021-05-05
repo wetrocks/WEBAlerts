@@ -80,7 +80,7 @@ stages:
           !.git/**/*
           !tests/**/*
           !.*
-          !.*/**
+          !.*.yml
           !ARM/**/*
           !htmlcov/**/*
           !junit/**/*
