@@ -11,7 +11,7 @@ variables:
   azureSubscription: 'rg-webnotifications_dev'
 
   # Function app name
-  functionAppName: 'func-webnotifications'
+  functionAppName: 'func-webnotificationsdev'
 
   # Agent VM image name
   vmImageName: 'ubuntu:18.04'
