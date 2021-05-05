@@ -8,7 +8,7 @@ trigger:
 
 variables:
   # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: 'rg-webnotifications'
+  azureSubscription: 'rg-webnotifications_dev'
 
   # Function app name
   functionAppName: 'func-webnotifications'
@@ -82,6 +82,9 @@ stages:
           !.*
           !.*/**
           !ARM/**/*
+          !htmlcov/**/*
+          !junit/**/*
+          !coverage.xml
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
     - task: ArchiveFiles@2
