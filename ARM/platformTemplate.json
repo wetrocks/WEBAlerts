@@ -132,7 +132,8 @@
                 "name": "DBConnection",
                 "connectionString": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('dbAccountName')), '2019-12-12').connectionStrings[0].connectionString]"
               }
-            ]
+            ],
+            "linuxFxVersion": "PYTHON|3.7"
           }
         }
       },
