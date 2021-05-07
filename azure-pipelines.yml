@@ -87,6 +87,7 @@ stages:
           !.vscode/**/*
           !.pytest*/**/*
           !coverage.xml
+          !coveragerc
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
     - task: ArchiveFiles@2
