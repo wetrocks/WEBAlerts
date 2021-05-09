@@ -7,11 +7,6 @@ trigger:
 - master
 
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: 'rg-webnotifications_dev'
-
-  # Function app name
-  functionAppName: 'func-webnotificationsdev'
 
   # Agent VM image name
   vmImageName: 'ubuntu:18.04'
@@ -24,104 +19,18 @@ stages:
   displayName: Build stage
 
   jobs:
-  - job: Build
-    displayName: Build
-    pool: Default
-    workspace:
-      clean: all
+    - template: azure-pipelines-build-template.yml
 
-    steps:
-    - bash: |
-        if [ -f extensions.csproj ]
-        then
-            dotnet build extensions.csproj --runtime ubuntu.16.04-x64 --output ./bin
-        fi
-      workingDirectory: $(workingDirectory)
-      displayName: 'Build extensions'
-
-    - task: UsePythonVersion@0
-      displayName: "Setting python version to 3.7 as required by functions"
-      inputs:
-        versionSpec: '3.7'
-        architecture: 'x64'
-    
-    - bash: |
-        if [ -f extensions.csproj ]
-        then
-            dotnet build extensions.csproj --output ./bin
-        fi
-        pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
-      displayName: 'Install tools and dependencies'  
-
-    - script: |
-        pip install pytest
-        pip install pytest-cov
-        pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --cov-config=coveragerc
-      displayName: 'Test with pytest'
-
-    - task: PublishTestResults@2
-      condition: succeededOrFailed()
-      inputs:
-        testResultsFiles: '**/test-*.xml'
-        testRunTitle: 'Publish test results for Python $(python.version)'
-
-    - task: PublishCodeCoverageResults@1
-      inputs:
-        codeCoverageTool: Cobertura
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'     
-
-    - task: CopyFiles@2
-      displayName: 'Copy code to: $(Build.ArtifactStagingDirectory) '
-      inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)'
-        Contents: |
-          **/*
-          !.git/**/*
-          !tests/**/*
-          !.*
-          !*.yml
-          !ARM/**/*
-          !htmlcov/**/*
-          !junit/**/*
-          !.vscode/**/*
-          !.pytest*/**/*
-          !coverage.xml
-          !coveragerc
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-    - task: ArchiveFiles@2
-      displayName: "Create deployment zip"
-      inputs:
-        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
-        includeRootFolder: false
-        archiveFile: "$(Build.ArtifactStagingDirectory)/build$(Build.BuildId).zip"
-    
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/build$(Build.BuildId).zip'
-        artifactName: 'drop'
-
-
-- stage: Deploy
-  displayName: Deploy stage
+- stage: DeployDEV
+  displayName: Deploy to dev environment
   dependsOn: Build
   condition: succeeded()
+  variables:
+    - group: webalerts-dev-vargroup
 
   jobs:
-  - deployment: Deploy
-    displayName: Deploy
-    environment: 'development'
-    pool: Default
-
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureFunctionApp@1
-            displayName: 'Azure functions app deploy'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              appType: functionAppLinux
-              appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/build$(Build.BuildId).zip'
+    - template: azure-pipelines-deployment-template.yml
+      parameters:
+        azureSubscription: '$(AzureConnectionName)'
+        funcAppName: '$(FunctionAppName)'
+        environment: 'development'

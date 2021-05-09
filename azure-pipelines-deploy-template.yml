@@ -1,0 +1,17 @@
+jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: $
+    pool: Default
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureFunctionApp@1
+            displayName: 'Azure functions app deploy'
+            inputs:
+              azureSubscription: $
+              appType: functionAppLinux
+              appName: $
+              package: '$(Pipeline.Workspace)/drop/build$(Build.BuildId).zip'
