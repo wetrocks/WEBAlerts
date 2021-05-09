@@ -32,6 +32,12 @@
         "metadata": {
           "description": "SendGrid Suppression Group Id"
         }
+      },
+      "sendGridListId": {
+        "type": "secureString",
+        "metadata": {
+          "description": "SendGrid List Id"
+        }
       }
     },
     "variables": {
@@ -121,6 +127,10 @@
               {
                 "name": "SENDGRID_SUPPGRP_ID",
                 "value": "[parameters('sendGridSuppressionGroupId')]"
+              },
+              {
+                "name": "SENDGRID_LIST_ID",
+                "value": "[parameters('sendGridListId')]"
               },
               {
                 "name": "DBConnection",

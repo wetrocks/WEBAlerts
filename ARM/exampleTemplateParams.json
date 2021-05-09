@@ -13,6 +13,9 @@
         },
         "sendGridSuppressionGroupId": {
             "value": "sgsuppgroupid" 
+        },
+        "sendGridListId": {
+            "value": "sglistid" 
         }
     }
 }

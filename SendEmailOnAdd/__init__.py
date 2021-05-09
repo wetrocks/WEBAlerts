@@ -16,6 +16,7 @@ def main(documents: func.DocumentList) -> None:
         sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
         sender_id = os.environ.get('SENDGRID_SENDER_ID')
         suppression_group_id = os.environ.get('SENDGRID_SUPPGRP_ID')
+        list_id = os.environ.get('SENDGRID_LIST_ID')
 
         subject_txt = db_document.get("title", "")
 
@@ -23,7 +24,8 @@ def main(documents: func.DocumentList) -> None:
         singlesend_data = {
             "name":  db_document["id"],
             "send_to": {
-                "all": True
+                "list_ids": [list_id],
+                "all": False
             },
             "email_config": {
                 "subject": f"WEB Notification{': ' if subject_txt != '' else ''}{subject_txt}",
