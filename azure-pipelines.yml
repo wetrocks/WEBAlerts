@@ -105,7 +105,7 @@ stages:
     - template: azure-pipelines-deploy-template.yml
       parameters:
         azureSub: rg-webnotifications_dev
-        environment: $(Environment)
+        environment: development
         funcAppName: $(FunctionAppName)
 
 - stage: DeployPROD
@@ -119,5 +119,5 @@ stages:
     - template: azure-pipelines-deploy-template.yml
       parameters:
         azureSub: rg-webnotifications
-        environment: $(Environment)
+        environment: production
         funcAppName: $(FunctionAppName)
