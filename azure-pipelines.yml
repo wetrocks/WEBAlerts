@@ -31,6 +31,6 @@ stages:
   jobs:
     - template: azure-pipelines-deploy-template.yml
       parameters:
-        azureSubscription: '$(AzureConnectionName)'
+        azureSub: '$(AzureConnectionName)'
         funcAppName: '$(FunctionAppName)'
         environment: 'development'
