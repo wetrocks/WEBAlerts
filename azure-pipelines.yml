@@ -15,10 +15,9 @@ variables:
   workingDirectory: '$(System.DefaultWorkingDirectory)/'
 
 stages:
+
 - stage: DeployDEV
   displayName: Deploy to dev environment
-  dependsOn: Build
-  condition: succeeded()
   variables:
     - group: webalerts-dev-vargroup
 
