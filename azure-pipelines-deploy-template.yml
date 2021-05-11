@@ -13,7 +13,6 @@ jobs:
   - deployment: Deploy
     displayName: Deploy
     environment: ${{ parameters.environment }}
-    pool: Default
 
     strategy:
       runOnce:
