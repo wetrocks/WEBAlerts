@@ -1,7 +1,18 @@
+parameters:
+  - name: environment
+    type: string
+    default: "not set"
+  - name: azureSub 
+    type: string 
+    default: "not set"
+  - name: funcAppName 
+    type: string 
+    default: "not set"  
+
 jobs:
   - deployment: Deploy
     displayName: Deploy
-    environment: $(environment)
+    environment: ${{ parameters.environment }}
     pool: Default
 
     strategy:
@@ -11,7 +22,7 @@ jobs:
           - task: AzureFunctionApp@1
             displayName: 'Azure functions app deploy'
             inputs:
-              azureSubscription: $({ parameters.azureSub }}
+              azureSubscription: ${{ parameters.azureSub }}
               appType: functionAppLinux
               appName: ${{ parameters.funcAppName }}
               package: '$(Pipeline.Workspace)/drop/build$(Build.BuildId).zip'

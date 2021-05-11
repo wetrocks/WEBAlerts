@@ -21,7 +21,9 @@ stages:
     - group: webalerts-dev-vargroup
 
   jobs:
-    - job: echo
-      steps:
-        - bash: echo $(AzureConnectionName)
+    - template: azure-pipelines-deploy-template.yml
+      parameters:
+        environment: development
+        azureSub: rg-webnotifications_dev
+        funcAppName: func-webnotificationsdev
 
