@@ -9,8 +9,6 @@ trigger:
 pool: Default
 
 variables:
-
-  # Working Directory
   workingDirectory: '$(System.DefaultWorkingDirectory)/'
 
 stages:
@@ -21,7 +19,6 @@ stages:
   jobs:
     - job: Build
       displayName: Build
-      pool: Default
       workspace:
           clean: all
   
@@ -31,8 +28,8 @@ stages:
           then
               dotnet build extensions.csproj --runtime ubuntu.16.04-x64 --output ./bin
           fi
-          workingDirectory: $(workingDirectory)
-          displayName: 'Build extensions'
+        workingDirectory: $(workingDirectory)
+        displayName: 'Build extensions'
   
       - task: UsePythonVersion@0
         displayName: "Setting python version to 3.7 as required by functions"
@@ -46,13 +43,13 @@ stages:
               dotnet build extensions.csproj --output ./bin
           fi
           pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
-          displayName: 'Install tools and dependencies'  
+        displayName: 'Install tools and dependencies'  
   
       - script: |
           pip install pytest
           pip install pytest-cov
           pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --cov-config=coveragerc
-          displayName: 'Test with pytest'
+        displayName: 'Test with pytest'
   
       - task: PublishTestResults@2
         condition: succeededOrFailed()
