@@ -24,6 +24,6 @@ stages:
     - template: azure-pipelines-deploy-template.yml
       parameters:
         environment: development
-        azureSub: $(AzureConnectionName)
+        azureSub: rg-webnotifications_dev
         funcAppName: $(FunctionAppName)
 
