@@ -15,11 +15,7 @@ variables:
   workingDirectory: '$(System.DefaultWorkingDirectory)/'
 
 stages:
-- stage: Build
-  displayName: Build stage
 
-  jobs:
-    - template: azure-pipelines-build-template.yml
 
 - stage: DeployDEV
   displayName: Deploy to dev environment
