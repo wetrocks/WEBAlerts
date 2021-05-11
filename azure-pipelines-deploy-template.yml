@@ -1,7 +1,7 @@
 jobs:
   - deployment: Deploy
     displayName: Deploy
-    environment: $
+    environment: $(environment)
     pool: Default
 
     strategy:
@@ -11,7 +11,7 @@ jobs:
           - task: AzureFunctionApp@1
             displayName: 'Azure functions app deploy'
             inputs:
-              azureSubscription: ${{ parameters.azureSubscription }}
+              azureSubscription: $(azureSubscription)
               appType: functionAppLinux
               appName: ${{ parameters.funcAppName }}
               package: '$(Pipeline.Workspace)/drop/build$(Build.BuildId).zip'
