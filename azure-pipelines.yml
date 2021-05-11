@@ -6,10 +6,9 @@
 trigger:
 - master
 
-variables:
+pool: Default
 
-  # Agent VM image name
-  vmImageName: 'ubuntu:18.04'
+variables:
 
   # Working Directory
   workingDirectory: '$(System.DefaultWorkingDirectory)/'
