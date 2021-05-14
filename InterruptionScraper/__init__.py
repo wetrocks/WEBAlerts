@@ -34,6 +34,8 @@ container_client = get_container_client()
     
 def main(url: str) -> dict:
 
+    logging.debug(url)
+
     # get id from end of url
     docId = pathlib.PurePosixPath(urlparse(url).path).parts[-1]
 
