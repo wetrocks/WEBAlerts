@@ -34,7 +34,7 @@ container_client = get_container_client()
     
 def main(url: str) -> dict:
 
-    logging.debug(url)
+    logging.warning(url)
 
     # get id from end of url
     docId = pathlib.PurePosixPath(urlparse(url).path).parts[-1]
@@ -67,6 +67,6 @@ def main(url: str) -> dict:
         else:
             returnVal["Message"] = "No content scraped"
 
-    logging.debug(returnVal)
+    logging.warning(returnVal)
 
     return returnVal
