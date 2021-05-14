@@ -24,9 +24,9 @@ def get_container_client():
     return client
 
 def scrape_content(interruption_url: str) -> str:
-    page_repsonse = requests.get(interruption_url)
-    page_repsonse.raise_for_status()
-    return html_helper.extract_interruption_info(page_repsonse.content)
+    page_response = requests.get(interruption_url)
+    page_response.raise_for_status()
+    return html_helper.extract_interruption_info(page_response.text)
 
 
 PARTITION_KEY_VAL = "interruption"
@@ -34,7 +34,7 @@ container_client = get_container_client()
     
 def main(url: str) -> dict:
 
-    logging.warning(url)
+    logging.debug(f'scraping url: {url}')
 
     # get id from end of url
     docId = pathlib.PurePosixPath(urlparse(url).path).parts[-1]
@@ -67,6 +67,6 @@ def main(url: str) -> dict:
         else:
             returnVal["Message"] = "No content scraped"
 
-    logging.warning(returnVal)
+    logging.debug(returnVal)
 
     return returnVal

@@ -33,9 +33,9 @@ class TestInterruptionScraper:
 
         html_tree = html.fromstring(info["content"])
         date_element = html_tree.xpath("//main/p[contains(string(), 'Date:')]")
-        date_str = etree.tostring(date_element[0], encoding=str)
+        date_str = etree.tostring(date_element[0], encoding=str).strip()
 
-        expectedDate = "<p><strong>Date: Saturday march 27<sup>th</sup> to Friday April 23<sup>rd</sup></strong><strong>, 2021</strong></p>"
+        expectedDate = "<p><strong>Date: Saturday march 27<sup>th </sup> to Friday April 23<sup>rd</sup></strong><strong>, 2021</strong></p>"
 
         assert expectedDate == date_str
 
@@ -46,7 +46,7 @@ class TestInterruptionScraper:
 
         html_tree = html.fromstring(info["content"])        
         time_element = html_tree.xpath("//main/p[contains(string(), 'Time:')]")
-        time_str = etree.tostring(time_element[0], encoding=str)
+        time_str = etree.tostring(time_element[0], encoding=str).strip()
 
         expectedTime = "<p><strong>Time: 06:00 </strong><strong>in the morning </strong><strong>– 19:00 </strong><strong>o’clock in the evening</strong></p>"
 
