@@ -51,16 +51,20 @@ def main(url: str) -> dict:
     else:
         pageContent = scrape_content(url)
 
-        newItem = {
-            "id": docId,
-            "notificationType": PARTITION_KEY_VAL,
-            "created": datetime.datetime.utcnow().isoformat(),
-            "title": pageContent["title"],
-            "content": pageContent["content"]
-        }
-#todo: in case something happens, write to db anyway w/ error or something
-        container_client.create_item(newItem)
-        
-        returnVal["created"] = True
+        if pageContent is not None:
+            newItem = {
+                "id": docId,
+                "notificationType": PARTITION_KEY_VAL,
+                "created": datetime.datetime.utcnow().isoformat(),
+                "title": pageContent["title"],
+                "content": pageContent["content"]
+            }
+            container_client.create_item(newItem)
+            
+            returnVal["created"] = True
+        else:
+            returnVal["Message"] = "No content scraped"
+
+    logging.debug(returnVal)
 
     return returnVal

@@ -10,7 +10,7 @@ def extract_interruption_info(htmlstr: str) -> dict:
     main_element = page_tree.xpath("body//main[1]")
     if len(main_element) != 1:
         logging.warning("No main element found")
-        return ""
+        return None
 
     main_element = main_element[0]
     # pull out the title
