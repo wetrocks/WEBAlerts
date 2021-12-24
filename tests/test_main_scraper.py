@@ -18,14 +18,22 @@ class TestMainScraper:
                         </div>
                     </div>
                     <div>
-                       <article>
+                        <article>
                             <div class="more than 1 div here">
                                 <div>
                                     <h3><a href="https://foo.com/bar">Card Title</a>
                                     <a href="https://foo.com/bar">Read Move</a>
                                 </div>
                             </div>
-                       </article>
+                        </article>
+                        <article>
+                            <div class="more than 1 div here">
+                                <div>
+                                    <h3><a href="https://foo.com/another">Card Title</a>
+                                    <a href="https://foo.com/another">Read Move</a>
+                                </div>
+                            </div>
+                        </article>
                     </div>
                 </div>
             </div></div></div>
@@ -39,6 +47,8 @@ class TestMainScraper:
 
         maint_urls = html_helper.extract_maintenance_links(html_str)
         
-        assert len(maint_urls) == 1
+        assert len(maint_urls) == 2
+        assert "https://foo.com/bar" in maint_urls
+        assert "https://foo.com/another" in maint_urls
 
 
