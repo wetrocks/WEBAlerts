@@ -93,30 +93,30 @@ stages:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)/build$(Build.BuildId).zip'
           artifactName: 'drop'
 
-# - stage: DeployDEV
-#   displayName: Deploy to dev environment
-#   dependsOn: Build
-#   condition:  succeeded()
-#   variables:
-#   - group: webalerts-dev-vargroup
+- stage: DeployDEV
+  displayName: Deploy to dev environment
+  dependsOn: Build
+  condition:  succeeded()
+  variables:
+  - group: webalerts-dev-vargroup
 
-#   jobs:
-#     - template: azure-pipelines-deploy-template.yml
-#       parameters:
-#         azureSub: rg-webnotifications_dev
-#         environment: development
-#         funcAppName: $(FunctionAppName)
+  jobs:
+    - template: azure-pipelines-deploy-template.yml
+      parameters:
+        azureSub: rg-webnotifications_dev
+        environment: development
+        funcAppName: $(FunctionAppName)
 
-# - stage: DeployPROD
-#   displayName: Deploy to production environment
-#   dependsOn: Build
-#   condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-#   variables:
-#   - group: webalerts-prod-vargroup
+- stage: DeployPROD
+  displayName: Deploy to production environment
+  dependsOn: Build
+  condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  variables:
+  - group: webalerts-prod-vargroup
 
-#   jobs:
-#     - template: azure-pipelines-deploy-template.yml
-#       parameters:
-#         azureSub: rg-webnotifications
-#         environment: production
-#         funcAppName: $(FunctionAppName)
+  jobs:
+    - template: azure-pipelines-deploy-template.yml
+      parameters:
+        azureSub: rg-webnotifications
+        environment: production
+        funcAppName: $(FunctionAppName)
