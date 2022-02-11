@@ -41,7 +41,7 @@ stages:
           then
               dotnet build extensions.csproj --output ./bin
           fi
-          pip3 install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
+          python -m pip install -r ./requirements.txt
         displayName: 'Install tools and dependencies'  
   
       - script: |
