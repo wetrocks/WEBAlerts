@@ -11,7 +11,7 @@ from lxml import html
 import requests
 
 def main(notUsed: str) -> str:
-    page_repsonse = requests.get('https://www.webbonaire.com/en/')
+    page_repsonse = requests.get('https://www.webbonaire.com/news/?lang=en')
     page_repsonse.raise_for_status()
 
     page_tree = html.fromstring(page_repsonse.content)
