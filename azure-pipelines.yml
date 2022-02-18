@@ -45,8 +45,8 @@ stages:
         displayName: 'Install tools and dependencies'  
   
       - script: |
-          pip3 install pytest
-          pip3 install pytest-cov
+          pip install pytest
+          pip install pytest-cov
           pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --cov-config=coveragerc
         displayName: 'Test with pytest'
   
