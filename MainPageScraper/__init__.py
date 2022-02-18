@@ -9,13 +9,13 @@
 import logging
 from lxml import html
 import requests
+from shared_code import html_helper
 
 def main(notUsed: str) -> str:
-    page_repsonse = requests.get('https://www.webbonaire.com/news/?lang=en')
-    page_repsonse.raise_for_status()
+    page_response = requests.get('https://www.webbonaire.com/news/?lang=en')
+    page_response.raise_for_status()
 
-    page_tree = html.fromstring(page_repsonse.content)
-    interruption_links = page_tree.xpath('//*[p[contains(text(), "Planned interruption")]]/ul/li//a/@href')
+    interruption_links = html_helper.extract_maintenance_links(page_response.content)
 
     logging.debug('Found links: %s', interruption_links)
 
