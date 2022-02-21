@@ -1,7 +1,7 @@
 # Do not include azure-functions-worker as it may conflict with the Azure Functions platform
 
 azure-functions
-azure-functions-durable>=1.0.0b12
+azure-functions-durable
 lxml
 requests
 azure-cosmos

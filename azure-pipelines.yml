@@ -4,22 +4,49 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
 
-pool: Default
+pool:
+  vmImage: 'ubuntu-latest'
 
 variables:
   workingDirectory: '$(System.DefaultWorkingDirectory)/'
 
 stages:
+- stage: Test
+  jobs:
+  - job: Test
+    displayName: Unit Tests
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.7'
+      inputs:
+        versionSpec: 3.7
+    - bash: |
+        pip install -r ./requirements.txt
+        pip install pytest
+        pip install pytest-cov
+      displayName:  Install dependencies
+    - bash: |
+        pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --cov-config=coveragerc
+      displayName: Run tests
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: '**/test-*.xml'
+        testRunTitle: 'Publish test results for Python $(python.version)'
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
 - stage: Build
-  displayName:  Build and test
-  
+  dependsOn: Test
+  condition: succeeded('Test')
   jobs:
     - job: Build
       displayName: Build
       workspace:
           clean: all
-  
       steps:
       - bash: |
           if [ -f extensions.csproj ]
@@ -28,39 +55,17 @@ stages:
           fi
         workingDirectory: $(workingDirectory)
         displayName: 'Build extensions'
-  
       - task: UsePythonVersion@0
-        displayName: "Setting python version to 3.7 as required by functions"
+        displayName: 'Use Python 3.7'
         inputs:
           versionSpec: '3.7'
           architecture: 'x64'
-  
       - bash: |
           if [ -f extensions.csproj ]
           then
               dotnet build extensions.csproj --output ./bin
           fi
-          pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
-        displayName: 'Install tools and dependencies'  
-  
-      - script: |
-          pip install pytest
-          pip install pytest-cov
-          pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --cov-config=coveragerc
-        displayName: 'Test with pytest'
-  
-      - task: PublishTestResults@2
-        condition: succeededOrFailed()
-        inputs:
-          testResultsFiles: '**/test-*.xml'
-          testRunTitle: 'Publish test results for Python $(python.version)'
-  
-      - task: PublishCodeCoverageResults@1
-        inputs:
-          codeCoverageTool: Cobertura
-          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-          reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'     
-  
+          pip install --target="$(workingDirectory)/.python_packages/lib/site-packages" -r ./requirements.txt
       - task: CopyFiles@2
         displayName: 'Copy code to: $(Build.ArtifactStagingDirectory) '
         inputs:
@@ -79,14 +84,12 @@ stages:
               !coverage.xml
               !coveragerc
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
-  
       - task: ArchiveFiles@2
         displayName: "Create deployment zip"
         inputs:
           rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
           includeRootFolder: false
           archiveFile: "$(Build.ArtifactStagingDirectory)/build$(Build.BuildId).zip"
-  
       - task: PublishBuildArtifacts@1
         inputs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)/build$(Build.BuildId).zip'
