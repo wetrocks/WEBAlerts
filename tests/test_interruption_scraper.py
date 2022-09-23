@@ -50,16 +50,5 @@ class TestInterruptionScraper:
         assert "body" == html_tree[0].tag
         assert "main" == html_tree[0][0].tag
 
-    def test_img_removed(self):
-        html_str = self.int_html.format(title_element="<h1>Title Text</h1>")
-
-        xpathq = "//p/img"
-
-        #make sure its there in the first place
-        assert 1 == len(html.fromstring(html_str).xpath(xpathq))
-
-        info = html_helper.extract_interruption_info(html_str)
-        
-        assert 0 == len(html.fromstring(info["content"]).xpath(xpathq))
 
 

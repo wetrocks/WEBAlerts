@@ -28,10 +28,6 @@ def extract_interruption_info(htmlstr: str) -> dict:
     main_element = main_element[0]
     # pull out the title
     title = "".join(main_element.xpath("header[1]/h1[1]/text()"))
-    
-    # remove paragraphs that have a child img
-    for pimg in main_element.xpath("//p/img"):
-        pimg.getparent().remove(pimg)
 
     content =  "<html><body>{}</body></html>".format(WHITESPACE_REGEX.sub(" ", html.tostring(main_element, encoding=str) ))
 
