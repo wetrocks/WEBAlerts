@@ -1,5 +1,5 @@
 [run]
 omit = 
-    tests/*
+    scraper/tests/*
     shared_code/__init__.py
     .venv/*

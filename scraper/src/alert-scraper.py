@@ -1,4 +1,5 @@
 from structlog import get_logger
+import sys
 import os
 import pathlib
 import requests
@@ -21,8 +22,14 @@ class Alert:
 
 
 def main():
-    # get from env var
-    maint_urls = scrape_maint_links('https://www.webbonaire.com/news/?lang=en')
+    # get from env var or cmdline
+    mainUrl = sys.argv[1] if len(sys.argv) >=2 else os.getenv("URL")
+
+    if mainUrl == None:
+        print('No url specified on cmdline or URL env var')
+        exit(1)
+
+    maint_urls = scrape_maint_links(mainUrl)
     logger.info('Found maintenance links', count=len(maint_urls))
 
     for maint_page in fetch_alert_details(maint_urls):

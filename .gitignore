@@ -45,3 +45,7 @@ __pycache__/
 *$py.class
 
 .DS_Store
+
+junit/
+htmlcov/
+coverage.xml

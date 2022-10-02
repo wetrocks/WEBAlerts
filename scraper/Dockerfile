@@ -9,4 +9,3 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY ./src/ .
 
 CMD [ "python3", "alert-scraper.py" ]
-
