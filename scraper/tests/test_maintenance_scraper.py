@@ -1,7 +1,7 @@
-from shared_code import html_helper
+from src.scrape import pageprocessor
 from lxml import etree, html
 
-class TestInterruptionScraper:
+class TestMaintenanceScraper:
 
     int_html = \
     '''
@@ -29,21 +29,21 @@ class TestInterruptionScraper:
     def test_extract_title(self):
         html_str = self.int_html.format(title_element="<h1>Title Text</h1>")
 
-        info = html_helper.extract_interruption_info(html_str)
+        info = pageprocessor.extract_interruption_info(html_str)
         
         assert "Title Text" == info["title"]
 
     def test_missing_title(self):
         html_str = self.int_html.format(title_element="")
 
-        info = html_helper.extract_interruption_info(html_str)
+        info = pageprocessor.extract_interruption_info(html_str)
         
         assert "" == info["title"]
 
     def test_html_structure(self):
         html_str = self.int_html.format(title_element="<h1>Title Text</h1>")
 
-        info = html_helper.extract_interruption_info(html_str)
+        info = pageprocessor.extract_interruption_info(html_str)
 
         html_tree = html.fromstring(info["content"])
         assert "html" == html_tree.tag

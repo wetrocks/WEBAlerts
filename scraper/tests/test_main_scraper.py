@@ -1,4 +1,4 @@
-from shared_code import html_helper
+from src.scrape import pageprocessor
 from lxml import etree, html
 
 class TestMainScraper:
@@ -45,7 +45,7 @@ class TestMainScraper:
     def test_extract_maintenance_links(self):
         html_str = self.main_html
 
-        maint_urls = html_helper.extract_maintenance_links(html_str)
+        maint_urls = pageprocessor.extract_maintenance_links(html_str)
         
         assert len(maint_urls) == 2
         assert "https://foo.com/bar" in maint_urls
