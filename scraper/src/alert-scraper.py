@@ -7,19 +7,13 @@ from urllib.parse import urlparse
 from dataclasses import dataclass
 import datetime
 
+from domain import Alert, AlertRepository
 
 from scrape import pageprocessor
 
 logger = get_logger()
 
-@dataclass(frozen=True)
-class Alert:
-    id: str
-    notificationType: str
-    created: datetime.datetime
-    title: str
-    content: str
-
+alertRepo: AlertRepository = AlertRepository()
 
 def main():
     # get from env var or cmdline
@@ -32,7 +26,7 @@ def main():
     maint_urls = scrape_maint_links(mainUrl)
     logger.info('Found maintenance links', count=len(maint_urls))
 
-    for maint_page in fetch_alert_details(maint_urls):
+    for maint_page in fetch_alert_details(maint_urls, alertRepo):
         print(maint_page)
 
 
@@ -48,22 +42,29 @@ def scrape_maint_links(mainUrl: str) -> list:
     return interruption_links
 
 
-def fetch_alert_details(maint_urls: list) -> Alert:
+def fetch_alert_details(maint_urls: list, repo: AlertRepository) -> Alert:
     alert_type = 'interruption'
 
     for maint_page in maint_urls:
-        logger.debug('Scraping maintenance page', url=maint_page)
-
         # get id from end of url path
         id = pathlib.PurePosixPath(urlparse(maint_page).path).parts[-1]
         
-        page_response = requests.get(maint_page)
-        page_response.raise_for_status()
-        maint_info = pageprocessor.extract_interruption_info(page_response.text)
+        logger.debug('Checking repository for alert', id=id)
+        savedAlert = repo.get(id)
+        if savedAlert is not None:
+            logger.info('New alert detected', id=id)
 
-        alert = Alert(id, alert_type, datetime.datetime.utcnow(),
-                      maint_info["title"], maint_info["content"])
-        yield alert
+            logger.debug('Scraping maintenance page', url=maint_page)
+            page_response = requests.get(maint_page)
+            page_response.raise_for_status()
+            maint_info = pageprocessor.extract_interruption_info(page_response.text)
+
+            alert = Alert(id, alert_type, datetime.datetime.utcnow(),
+                          maint_info["title"], maint_info["content"])
+            yield alert
+        else:
+            logger.debug('Alert already processed',  id=id)
+            yield None
 
 
 if __name__ == "__main__":
