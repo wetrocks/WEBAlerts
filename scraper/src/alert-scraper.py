@@ -1,6 +1,4 @@
-from weakref import KeyedRef
 from structlog import get_logger
-import sys
 import os
 import pathlib
 import requests
