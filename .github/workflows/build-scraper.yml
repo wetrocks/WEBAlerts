@@ -1,0 +1,8 @@
+name: learn-github-actions
+run-name: Build scraper app container
+on: [push]
+jobs:
+  check-bats-version:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "hello world"
