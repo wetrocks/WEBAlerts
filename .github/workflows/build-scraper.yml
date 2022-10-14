@@ -1,5 +1,5 @@
 name: build-scraper
-run-name: Build scraper app container
+run-name: Build scraper container image
 on: [push]
 jobs:
   Build:
@@ -24,3 +24,13 @@ jobs:
         with:
           paths: "junit/**/test-*.xml"
         if: always()
+  CreateImage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: false
+          tags: webalerts/scraper:latest
