@@ -36,5 +36,5 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:scraper"
-          push: false
+          push: true
           tags: webalerts/scraper:latest
