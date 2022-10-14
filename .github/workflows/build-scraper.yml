@@ -20,7 +20,7 @@ jobs:
           pip install pytest-cov
           pytest --doctest-modules --junitxml=junit/TEST-results.xml --cov=. --cov-report=xml --cov-report=html
       - name: Test results
-        uses: test-summary/action@v2.0
+        uses: test-summary/action@v1.0
         with:
           paths: "junit/**/TEST-*.xml"
         if: always()
