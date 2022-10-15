@@ -1,7 +1,7 @@
 from azure.cosmos import CosmosClient
 from domain import Alert
 from datetime import datetime
-from structlog import get_logger
+
 
 class CosmosAlertRepository:
 
@@ -30,17 +30,16 @@ class CosmosAlertRepository:
         if not dbAlert:
             return None
 
-        return Alert( 
-                dbAlert["id"], 
+        return Alert(
+                dbAlert["id"],
                 dbAlert["notificationType"],
                 datetime.fromisoformat(dbAlert["created"]),
                 dbAlert["title"],
                 dbAlert["content"]
             )
 
-
     def save(self, alert: Alert) -> dict:
-        
+
         newItem = {
             "id": alert.id,
             "notificationType": alert.notificationType,
@@ -48,7 +47,7 @@ class CosmosAlertRepository:
             "title": alert.title,
             "content": alert.content
         }
-        
+
         return self.container_client.create_item(newItem)
 
     def __get_container_client(self, conn_str: str, db_name: str, db_container: str):

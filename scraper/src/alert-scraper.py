@@ -3,7 +3,6 @@ import os
 import pathlib
 import requests
 from urllib.parse import urlparse
-from dataclasses import dataclass
 import datetime
 from dataclasses import asdict
 
@@ -13,6 +12,7 @@ from storage.CosmosAlertRepository import CosmosAlertRepository
 from scrape import pageprocessor
 
 logger = get_logger()
+
 
 def main():
     # get main URL and DB conection info
@@ -53,7 +53,7 @@ def fetch_alert_details(maint_urls: list, repo: AlertRepository) -> Alert:
     for maint_page in maint_urls:
         # get id from end of url path
         id = pathlib.PurePosixPath(urlparse(maint_page).path).parts[-1]
-        
+
         logger.debug('Checking repository for alert', id=id)
         savedAlert = repo.get(id)
         if savedAlert is None:
