@@ -15,6 +15,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r scraper/requirements.txt
+      - name: Lint with flake8
+        run: |
+          flake8 ./scraper --count --statistics --show-source
       - name: Run tests
         run: |
           pip install pytest
