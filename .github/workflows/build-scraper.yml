@@ -17,6 +17,7 @@ jobs:
           pip install -r scraper/requirements.txt
       - name: Lint with flake8
         run: |
+          pip install flake8
           flake8 ./scraper --count --statistics --show-source
       - name: Run tests
         run: |
