@@ -41,7 +41,7 @@ jobs:
     needs: BuildTest
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{needs.BuildTest}}
+      - run: echo ${{needs.BuildTest.outputs}}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to GitHub Container Registry
