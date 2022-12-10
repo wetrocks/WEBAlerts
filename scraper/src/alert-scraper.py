@@ -5,13 +5,17 @@ import requests
 from urllib.parse import urlparse
 import datetime
 from dataclasses import asdict
+import json
 
 from domain import Alert, AlertRepository
 from storage.CosmosAlertRepository import CosmosAlertRepository
+from dapr.clients import DaprClient
 
 from scrape import pageprocessor
 
 logger = get_logger()
+
+MSG_BINDING_NAME = "alertqueue"
 
 
 def main():
@@ -34,6 +38,8 @@ def main():
             logger.debug('Saving alert details', **asdict(maint_page))
             alertRepo.save(maint_page)
             logger.info('Saved alert', id=maint_page.id)
+
+            publish_alert(maint_page)
 
 
 def scrape_maint_links(mainUrl: str) -> list:
@@ -70,6 +76,12 @@ def fetch_alert_details(maint_urls: list, repo: AlertRepository) -> Alert:
         else:
             logger.debug('Alert already processed',  id=id)
             yield None
+
+
+def publish_alert(alert: Alert):
+
+    with DaprClient() as client:
+        client.invoke_binding(MSG_BINDING_NAME, "create", json.dumps(alert))
 
 
 if __name__ == "__main__":
