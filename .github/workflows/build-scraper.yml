@@ -5,8 +5,15 @@ jobs:
   BuildTest:
     name: Build and Test
     runs-on: ubuntu-latest
+    outputs:
+      short_hash: ${{ steps.commithash.outputs.short_hash }}
     steps:
       - uses: actions/checkout@v3
+      - name: Set short git commit hash
+        id: commithash
+        run: |
+          short_sha=$(git rev-parse --short ${{ github.sha }})
+          echo "short_hash=$short_sha" >> $GITHUB_OUTPUT"
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -34,11 +41,6 @@ jobs:
     needs: BuildTest
     runs-on: ubuntu-latest
     steps:
-      - name: Set short git commit SHA
-        id: vars
-        run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "::set-output name=short_sha::$calculatedSha"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to GitHub Container Registry
@@ -53,5 +55,5 @@ jobs:
           context: "{{defaultContext}}:scraper"
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/webalerts/scraper:${{ steps.vars.outputs.short_sha }}
+            ghcr.io/${{ github.repository_owner }}/webalerts/scraper: ${{ needs.BuildTest.outputs.short_hash }} 
             ghcr.io/${{ github.repository_owner }}/webalerts/scraper:latest
