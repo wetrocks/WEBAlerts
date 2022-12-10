@@ -13,7 +13,7 @@ jobs:
         id: commithash
         run: |
           short_sha=$(git rev-parse --short ${{ github.sha }})
-          echo "short_hash=$short_sha" >> $GITHUB_OUTPUT"
+          echo "short_hash=$short_sha >> $GITHUB_OUTPUT"
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
