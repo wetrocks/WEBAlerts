@@ -4,6 +4,11 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "3.34.0"
     }
+
+    azapi = {
+      source  = "Azure/azapi"
+      version = "1.1.0"
+    }
   }
 
   required_version = ">= 1.3.6"
@@ -43,18 +48,6 @@ resource "azurerm_servicebus_queue" "alert" {
   name                              = var.servicebus_alert_queue_name
   namespace_id                      = azurerm_servicebus_namespace.webalerts.id
   forward_dead_lettered_messages_to = azurerm_servicebus_queue.deadletter.name
-}
-
-resource "azurerm_user_assigned_identity" "webalerts" {
-  name                = var.userassigned_id
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-}
-
-resource "azurerm_role_assignment" "example" {
-  scope                = azurerm_servicebus_namespace.webalerts.id
-  role_definition_name = "Azure Service Bus Data Owner"
-  principal_id         = azurerm_user_assigned_identity.webalerts.principal_id
 }
 
 resource "azurerm_cosmosdb_account" "webalerts" {
@@ -100,10 +93,10 @@ resource "azurerm_cosmosdb_sql_container" "notifications" {
 
 
 resource "azurerm_log_analytics_workspace" "webalerts" {
-  name                       = var.loganalytics_workspace_name
-  location                   = azurerm_resource_group.rg.location
-  resource_group_name        = azurerm_resource_group.rg.name
-  sku                        = "PerGB2018"
+  name                = var.loganalytics_workspace_name
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "PerGB2018"
 }
 
 resource "azurerm_application_insights" "webalerts" {
@@ -112,4 +105,104 @@ resource "azurerm_application_insights" "webalerts" {
   resource_group_name = azurerm_resource_group.rg.name
   workspace_id        = azurerm_log_analytics_workspace.webalerts.id
   application_type    = "web"
+}
+
+resource "azapi_resource" "webalerts-containerappenv" {
+  name      = "caenv-webalerts-dev"
+  location  = azurerm_resource_group.rg.location
+  parent_id = azurerm_resource_group.rg.id
+  type      = "Microsoft.App/managedEnvironments@2022-03-01"
+
+  body = jsonencode({
+    properties = {
+      daprAIInstrumentationKey = azurerm_application_insights.webalerts.instrumentation_key
+      appLogsConfiguration = {
+        destination = "log-analytics"
+        logAnalyticsConfiguration = {
+          customerId = azurerm_log_analytics_workspace.webalerts.workspace_id
+          sharedKey  = azurerm_log_analytics_workspace.webalerts.primary_shared_key
+        }
+      }
+    }
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "azapi_resource" "dapr_components" {
+  name      = "alertqueue"
+  parent_id = azapi_resource.webalerts-containerappenv.id
+  type      = "Microsoft.App/managedEnvironments/daprComponents@2022-03-01"
+
+  body = jsonencode({
+    properties = {
+      componentType = "bindings.azure.servicebusqueues"
+      version       = "v1"
+      metadata = [
+        {
+          name : "namespaceName"
+          value : format("%s.servicebus.windows.net", azurerm_servicebus_namespace.webalerts.name)
+        },
+        {
+          name  = "queueName",
+          value = azurerm_servicebus_queue.alert.name 
+        }
+      ]
+      scopes = ["scraper"]
+    }
+  })
+}
+
+resource "azapi_resource" "container_app" {
+  name      = "webalerts-dev-scraper"
+  location  = azurerm_resource_group.rg.location
+  parent_id = azurerm_resource_group.rg.id
+  type      = "Microsoft.App/containerApps@2022-03-01"
+  identity {
+    type = "SystemAssigned"
+  }
+
+  body = jsonencode({
+    properties : {
+      managedEnvironmentId = azapi_resource.webalerts-containerappenv.id
+      configuration = {
+        activeRevisionsMode : "Single"
+        dapr = {
+          enabled = true
+          appId   = "scraper"
+        }
+      }
+      template = {
+        containers = [{
+          image = "ghcr.io/wetrocks/webalerts/scraper:latest"
+          name  = "webalerts-scraper"
+          resources = {
+            cpu    = 0.25
+            memory = "0.5Gi"
+          }
+        }]
+        scale = {
+          maxReplicas = 1
+          minReplicas = 0
+          rules       = []
+        }
+      }
+    }
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "azurerm_role_assignment" "scraper_to_sb" {
+  scope                = azurerm_servicebus_namespace.webalerts.id
+  role_definition_name = "Azure Service Bus Data Owner"
+  principal_id         = azapi_resource.container_app.identity[0].principal_id
 }
