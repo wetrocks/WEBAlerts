@@ -21,9 +21,9 @@ MSG_BINDING_NAME = "alertqueue"
 def main():
     # get main URL and DB conection info
     try:
-        main_url = os.environ["URL"]
-        db_endpoint = os.environ["DB_ENDPOINT"]
-        db_name = os.environ["DB_NAME"]
+        main_url = os.environ["URL"].strip()
+        db_endpoint = os.environ["DB_ENDPOINT"].strip()
+        db_name = os.environ["DB_NAME"].strip()
     except KeyError as ke:
         logger.fatal('Missing required environment variable', var=ke.args[0])
         exit(1)
