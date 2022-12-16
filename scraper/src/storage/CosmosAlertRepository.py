@@ -1,6 +1,7 @@
 from azure.cosmos import CosmosClient
 from domain import Alert
 from datetime import datetime
+from structlog import get_logger
 
 
 class CosmosAlertRepository:
@@ -9,14 +10,18 @@ class CosmosAlertRepository:
     db_name: str = ''
     container = 'notifications'
     container_client = None
+    logger = None
 
     def __init__(self, connStr: str, dbName: str):
+        self.logger = get_logger()
+
         self.conn_Str = connStr
         self.db_name = dbName
 
         self.container_client = self.__get_container_client(self.conn_Str, self.db_name, self.container)
 
     def get(self, id: str) -> Alert:
+        self.logger.debug('Query db for notification', db_name=self.db_name, id=id)
 
         # check if exists in db
         dbItems = self.container_client.query_items(

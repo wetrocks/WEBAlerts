@@ -91,6 +91,15 @@ resource "azurerm_cosmosdb_sql_container" "notifications" {
   partition_key_path = "/notificationType"
 }
 
+resource "azurerm_cosmosdb_sql_container" "leases" {
+  name                = "leases"
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name        = azurerm_cosmosdb_account.webalerts.name
+  database_name       = azurerm_cosmosdb_sql_database.webalerts.name
+
+  partition_key_path = "/id"
+}
+
 
 resource "azurerm_log_analytics_workspace" "webalerts" {
   name                = var.loganalytics_workspace_name

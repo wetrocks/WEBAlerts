@@ -31,12 +31,6 @@ variable "servicebus_deadletter_queue_name" {
   default     = "sbq-deadletter"
 }
 
-variable "userassigned_id" {
-  description = "Name of managed idenntity assigned to resources"
-  type        = string
-  nullable    = false
-}
-
 variable "cosmos_acct_name" {
   description = "CosmosDB account name"
   type        = string
