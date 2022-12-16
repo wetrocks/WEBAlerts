@@ -158,7 +158,7 @@ resource "azapi_resource" "dapr_components" {
         },
         {
           name  = "queueName",
-          value = azurerm_servicebus_queue.alert.name 
+          value = azurerm_servicebus_queue.alert.name
         }
       ]
       scopes = ["scraper"]
@@ -183,7 +183,13 @@ resource "azapi_resource" "container_app" {
         dapr = {
           enabled = true
           appId   = "scraper"
-        }
+        },
+        secrets = [
+          {
+            name  = "db-conn-str",
+            value = azurerm_cosmosdb_account.webalerts.connection_strings[0]
+          }
+        ]
       }
       template = {
         containers = [{
@@ -193,7 +199,12 @@ resource "azapi_resource" "container_app" {
             cpu    = 0.25
             memory = "0.5Gi"
           }
-        }]
+          env = [
+            { name = "DB_ENDPOINT", secretRef = "db-conn-str" },
+            { name = "DB_NAME", value = azurerm_cosmosdb_sql_database.webalerts.name },
+            { name = "URL", value = var.scrape_url }
+          ]
+        }],
         scale = {
           maxReplicas = 1
           minReplicas = 0

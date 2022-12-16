@@ -2,6 +2,7 @@ from structlog import get_logger
 import os
 import pathlib
 import requests
+import time
 from urllib.parse import urlparse
 import datetime
 from dataclasses import asdict
@@ -12,6 +13,8 @@ from storage.CosmosAlertRepository import CosmosAlertRepository
 from dapr.clients import DaprClient
 
 from scrape import pageprocessor
+
+SLEEP_SECONDS = 60 * 60 * 6
 
 logger = get_logger()
 
@@ -94,4 +97,7 @@ def publish_alert(alert: Alert):
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        main()
+        logger.info("Waiting to run again", seconds=SLEEP_SECONDS)
+        time.sleep(SLEEP_SECONDS)

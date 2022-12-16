@@ -62,3 +62,9 @@ variable "appinsights_name" {
   type        = string
   nullable    = false
 }
+
+variable "scrape_url" {
+  description = "URL to scrape"
+  type        = string
+  nullable    = false
+}
