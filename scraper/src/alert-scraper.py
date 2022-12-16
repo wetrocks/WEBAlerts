@@ -85,7 +85,7 @@ def fetch_alert_details(maint_urls: list, repo: AlertRepository) -> Alert:
 def publish_alert(alert: Alert):
 
     with DaprClient() as client:
-        msg = { 
+        msg = {
             "id": alert.id,
             "notificationType": alert.notificationType
         }
