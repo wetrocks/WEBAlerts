@@ -85,7 +85,12 @@ def fetch_alert_details(maint_urls: list, repo: AlertRepository) -> Alert:
 def publish_alert(alert: Alert):
 
     with DaprClient() as client:
-        client.invoke_binding(MSG_BINDING_NAME, "create", json.dumps(alert))
+        msg = { 
+            "id": alert.id,
+            "notificationType": alert.notificationType
+        }
+        logger.debug("Publishing alert to binding", binding=MSG_BINDING_NAME, data=msg)
+        client.invoke_binding(MSG_BINDING_NAME, "create", json.dumps(msg))
 
 
 if __name__ == "__main__":
