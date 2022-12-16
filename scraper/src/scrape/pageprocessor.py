@@ -1,8 +1,9 @@
-import logging
 import re
 from lxml import html
+from structlog import get_logger
 
 WHITESPACE_REGEX = re.compile(r"\s+")
+logger = get_logger()
 
 
 def extract_maintenance_links(htmlstr: str) -> list:
@@ -22,7 +23,7 @@ def extract_interruption_info(htmlstr: str) -> dict:
 
     main_element = page_tree.xpath("body//main[1]")
     if len(main_element) != 1:
-        logging.warning("No main element found")
+        logger.debug("No main element found")
         return None
 
     main_element = main_element[0]

@@ -70,9 +70,13 @@ def fetch_alert_details(maint_urls: list, repo: AlertRepository) -> Alert:
             page_response.raise_for_status()
             maint_info = pageprocessor.extract_interruption_info(page_response.text)
 
-            alert = Alert(id, alert_type, datetime.datetime.utcnow(),
-                          maint_info["title"], maint_info["content"])
-            yield alert
+            if maint_info:
+                alert = Alert(id, alert_type, datetime.datetime.utcnow(),
+                              maint_info["title"], maint_info["content"])
+                yield alert
+            else:
+                logger.debug('Processing page failed, skipping', url=maint_page)
+                yield None
         else:
             logger.debug('Alert already processed',  id=id)
             yield None
