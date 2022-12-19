@@ -208,7 +208,20 @@ resource "azapi_resource" "container_app" {
         scale = {
           maxReplicas = 1
           minReplicas = 0
-          rules       = []
+          rules = [
+            { 
+              name = "noon"
+              custom = {
+                type = "cron"
+                metadata = {
+                  timezone        = "America/New_York"
+                  start           = "0 12 * * *"
+                  end             = "5 12 * * *"
+                  desiredReplicas = "1"
+                }
+              }
+            }
+          ]
         }
       }
     }
