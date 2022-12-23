@@ -1,4 +1,4 @@
-from src.scrape import pageprocessor
+from scrape import pageprocessor
 from lxml import etree, html
 
 class TestMainScraper:
