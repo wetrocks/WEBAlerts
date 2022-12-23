@@ -28,12 +28,12 @@ settings = Settings(_env_file='.env')
 
 # Needed for dapr
 @app.options("/alerts")
-async def rootoptions():
+async def handleAlertMsg():
     return {"canprocess": True}
 
 
 @app.post("/alerts")
-async def root(alertMsg: AlertMessage):
+async def handleAlertMsg(alertMsg: AlertMessage):
     logger.info("Recieved alert message", id=alertMsg.id)
 
     try:
