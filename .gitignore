@@ -52,6 +52,7 @@ __pycache__/
 junit/
 htmlcov/
 coverage.xml
+.coverage
 
 # Local .terraform directories
 **/.terraform/*
