@@ -7,33 +7,30 @@ from urllib.parse import urlparse
 import datetime
 from dataclasses import asdict
 import json
+from pydantic import BaseSettings
 
-from domain import Alert, AlertRepository
-from storage.CosmosAlertRepository import CosmosAlertRepository
+from common.domain import Alert, AlertRepository
+from common.storage import CosmosAlertRepository
 from dapr.clients import DaprClient
+from .scrape import pageprocessor
 
-from scrape import pageprocessor
+class Settings(BaseSettings):
+    url: str
+    db_endpoint: str
+    db_name: str
 
 SLEEP_SECONDS = 60 * 60 * 6
 
 logger = get_logger()
+settings = Settings(_env_file='.env')
 
 MSG_BINDING_NAME = "alertqueue"
 
 
 def main():
-    # get main URL and DB conection info
-    try:
-        main_url = os.environ["URL"].strip()
-        db_endpoint = os.environ["DB_ENDPOINT"].strip()
-        db_name = os.environ["DB_NAME"].strip()
-    except KeyError as ke:
-        logger.fatal('Missing required environment variable', var=ke.args[0])
-        exit(1)
+    alertRepo = CosmosAlertRepository(settings.db_endpoint, settings.db_name)
 
-    alertRepo = CosmosAlertRepository(db_endpoint, db_name)
-
-    maint_urls = scrape_maint_links(main_url)
+    maint_urls = scrape_maint_links(settings.url)
     logger.info('Found maintenance links', count=len(maint_urls))
 
     for maint_page in fetch_alert_details(maint_urls, alertRepo):
@@ -81,7 +78,7 @@ def fetch_alert_details(maint_urls: list, repo: AlertRepository) -> Alert:
                 logger.debug('Processing page failed, skipping', url=maint_page)
                 yield None
         else:
-            logger.debug('Alert already processed',  id=id)
+            logger.info('Alert already processed',  id=id)
             yield None
 
 
