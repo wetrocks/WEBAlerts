@@ -1,5 +1,4 @@
 from structlog import get_logger
-import os
 import pathlib
 import requests
 import time
@@ -14,10 +13,12 @@ from common.storage import CosmosAlertRepository
 from dapr.clients import DaprClient
 from .scrape import pageprocessor
 
+
 class Settings(BaseSettings):
     url: str
     db_endpoint: str
     db_name: str
+
 
 SLEEP_SECONDS = 60 * 60 * 6
 
