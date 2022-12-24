@@ -28,7 +28,7 @@ settings = Settings(_env_file='.env')
 
 # Needed for dapr
 @app.options("/alertqueue")
-async def handleAlertMsg():
+async def handleAlertMsgOptions():
     return {"canprocess": True}
 
 
