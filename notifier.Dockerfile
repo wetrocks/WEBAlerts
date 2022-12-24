@@ -9,4 +9,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY ./common ./common
 COPY ./notifier/ ./notifier
 
-CMD [ "uvicorn" , "notifier.main:app" ]
+CMD [ "uvicorn" , "notifier.main:app", "--port", "8000" ]
