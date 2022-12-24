@@ -5,6 +5,7 @@ on:
     paths:
       - 'common/**'
       - 'notifier/**'
+      - 'notifier.Dockerfile'
 jobs:
   BuildTest:
     name: Build and Test
@@ -47,7 +48,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          file: scraper.Dockerfile
+          file: notifier.Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/webalerts/notifier:${{ needs.BuildTest.outputs.short_hash }} 
