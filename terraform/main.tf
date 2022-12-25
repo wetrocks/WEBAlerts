@@ -161,7 +161,7 @@ resource "azapi_resource" "dapr_components" {
           value = azurerm_servicebus_queue.alert.name
         }
       ]
-      scopes = ["scraper"]
+      scopes = ["scraper", "notifier"]
     }
   })
 }
@@ -234,8 +234,91 @@ resource "azapi_resource" "container_app" {
   }
 }
 
+resource "azapi_resource" "notifier_containerapp" {
+  name      = "webalerts-dev-notifier"
+  location  = azurerm_resource_group.rg.location
+  parent_id = azurerm_resource_group.rg.id
+  type      = "Microsoft.App/containerApps@2022-03-01"
+  identity {
+    type = "SystemAssigned"
+  }
+
+  body = jsonencode({
+    properties : {
+      managedEnvironmentId = azapi_resource.webalerts-containerappenv.id
+      configuration = {
+        activeRevisionsMode : "Single"
+        dapr = {
+          enabled = true
+          appId   = "notifier"
+          appPort = 8000
+          appProtocol = "http"
+        },
+        secrets = [
+          {
+            name  = "db-conn-str",
+            value = azurerm_cosmosdb_account.webalerts.connection_strings[0]
+          },
+          {
+            name = "sendgrid-api-key",
+            value = var.sendgrid_api_key
+          }
+        ]
+      }
+      template = {
+        containers = [{
+          image = "ghcr.io/wetrocks/webalerts/notifier:latest"
+          name  = "webalerts-notifier"
+          resources = {
+            cpu    = 0.25
+            memory = "0.5Gi"
+          }
+          env = [
+            { name = "DB_ENDPOINT", secretRef = "db-conn-str" },
+            { name = "DB_NAME", value = azurerm_cosmosdb_sql_database.webalerts.name },
+            { name = "SENDGRID_API_KEY", secretRef = "sendgrid-api-key" },
+            { name = "SENDGRID_SENDER_ID", value = var.sendgrid_sender_id },
+            { name = "SENDGRID_SUPPGRP_ID", value = var.sendgrid_suppgroup_id },
+            { name = "SENDGRID_LIST_ID", value = var.sendgrid_list_id }
+          ]
+        }],
+        scale = {
+          maxReplicas = 1
+          minReplicas = 0
+          rules = [
+            { 
+              name = "noon"
+              custom = {
+                type = "cron"
+                metadata = {
+                  timezone        = "America/New_York"
+                  start           = "5 12 * * *"
+                  end             = "10 12 * * *"
+                  desiredReplicas = "1"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
 resource "azurerm_role_assignment" "scraper_to_sb" {
   scope                = azurerm_servicebus_namespace.webalerts.id
   role_definition_name = "Azure Service Bus Data Owner"
   principal_id         = azapi_resource.container_app.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "notifier_to_sb" {
+  scope                = azurerm_servicebus_namespace.webalerts.id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = azapi_resource.notifier_containerapp.identity[0].principal_id
 }
