@@ -209,12 +209,12 @@ resource "azapi_resource" "container_app" {
           maxReplicas = 1
           minReplicas = 0
           rules = [
-            { 
+            {
               name = "noon"
               custom = {
                 type = "cron"
                 metadata = {
-                  timezone        = "America/New_York"
+                  timezone        = "America/Kralendijk"
                   start           = "0 12 * * *"
                   end             = "5 12 * * *"
                   desiredReplicas = "1"
@@ -249,9 +249,9 @@ resource "azapi_resource" "notifier_containerapp" {
       configuration = {
         activeRevisionsMode : "Single"
         dapr = {
-          enabled = true
-          appId   = "notifier"
-          appPort = 8000
+          enabled     = true
+          appId       = "notifier"
+          appPort     = 8000
           appProtocol = "http"
         },
         secrets = [
@@ -260,7 +260,11 @@ resource "azapi_resource" "notifier_containerapp" {
             value = azurerm_cosmosdb_account.webalerts.connection_strings[0]
           },
           {
-            name = "sendgrid-api-key",
+            name  = "sb-conn-str",
+            value = azurerm_servicebus_namespace.webalerts.default_primary_connection_string
+          },
+          {
+            name  = "sendgrid-api-key",
             value = var.sendgrid_api_key
           }
         ]
@@ -286,16 +290,20 @@ resource "azapi_resource" "notifier_containerapp" {
           maxReplicas = 1
           minReplicas = 0
           rules = [
-            { 
-              name = "noon"
+            {
+              name = "alert-queue-msg"
               custom = {
-                type = "cron"
+                type = "azure-servicebus"
                 metadata = {
-                  timezone        = "America/New_York"
-                  start           = "5 12 * * *"
-                  end             = "10 12 * * *"
-                  desiredReplicas = "1"
+                  queueName              = azurerm_servicebus_queue.alert.name
+                  activationMessageCount = 1
                 }
+                auth = [
+                  {
+                    secretRef        = "sb-conn-str"
+                    triggerParameter = "connection"
+                  }
+                ]
               }
             }
           ]

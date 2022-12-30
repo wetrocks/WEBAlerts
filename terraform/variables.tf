@@ -71,25 +71,25 @@ variable "scrape_url" {
 
 variable "sendgrid_api_key" {
   description = "SendGrid API key"
-  type = string
-  nullable = false
-  sensitive = true
+  type        = string
+  nullable    = false
+  sensitive   = true
 }
 
 variable "sendgrid_sender_id" {
   description = "SendGrid sender id"
-  type = string
-  nullable = false
+  type        = string
+  nullable    = false
 }
 
 variable "sendgrid_suppgroup_id" {
   description = "SendGrid suppression group id"
-  type = string
-  nullable = false
+  type        = string
+  nullable    = false
 }
 
 variable "sendgrid_list_id" {
   description = "SendGrid list id"
-  type = string
-  nullable = false
+  type        = string
+  nullable    = false
 }
