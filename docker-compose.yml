@@ -1,0 +1,65 @@
+version: '3'
+services:
+  scraper:
+    build:
+      dockerfile: ./scraper.Dockerfile
+      context: .
+    env_file:
+      - .env
+    ports:
+      - "50001:50001" # Dapr instances communicate over gRPC so we need to expose the gRPC port
+    depends_on:
+      - placement
+    networks:
+      - alertsdev-dapr
+  scraper-dapr:
+    image: "daprio/daprd:edge"
+    command:
+      [
+        "./daprd",
+        "--app-id", "scraper",
+        "--placement-host-address", "placement:50006", # Dapr's placement service can be reach via the docker DNS entry
+        "--components-path", "./components"
+      ]
+    volumes:
+      - "./components/:/components" # Mount our components folder for the runtime to use. The mounted location must match the --components-path argument.
+    depends_on:
+      - scraper
+    network_mode: "service:scraper"
+  notifier:
+    build:
+      dockerfile: ./notifier.Dockerfile
+      context: .
+    env_file:
+      - .env
+    ports:
+      - "8001:8000"
+      - "50002:50001"
+    depends_on:
+      - placement
+    networks:
+      - alertsdev-dapr
+  notifier-dapr:
+    image: "daprio/daprd:edge"
+    command:
+      [
+        "./daprd",
+        "--app-id", "notifier",
+        "--app-port", "8001",
+        "--placement-host-address", "placement:50006",
+        "--components-path", "/components"
+      ]
+    volumes:
+      - "./components/:/components"
+    depends_on:
+      - scraper
+    network_mode: "service:notifier"
+  placement:
+    image: "daprio/dapr"
+    command: [ "./placement", "--port", "50006" ]
+    ports:
+      - "50006:50006"
+    networks:
+      - alertsdev-dapr
+networks:
+  alertsdev-dapr:
