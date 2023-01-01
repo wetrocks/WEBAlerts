@@ -117,7 +117,7 @@ resource "azurerm_application_insights" "webalerts" {
 }
 
 resource "azapi_resource" "webalerts-containerappenv" {
-  name      = "caenv-webalerts-dev"
+  name      = var.containerappenv_name
   location  = azurerm_resource_group.rg.location
   parent_id = azurerm_resource_group.rg.id
   type      = "Microsoft.App/managedEnvironments@2022-03-01"
@@ -166,8 +166,8 @@ resource "azapi_resource" "dapr_components" {
   })
 }
 
-resource "azapi_resource" "container_app" {
-  name      = "webalerts-dev-scraper"
+resource "azapi_resource" "scraper_containerapp" {
+  name      = var.scraper_app_name
   location  = azurerm_resource_group.rg.location
   parent_id = azurerm_resource_group.rg.id
   type      = "Microsoft.App/containerApps@2022-03-01"
@@ -235,7 +235,7 @@ resource "azapi_resource" "container_app" {
 }
 
 resource "azapi_resource" "notifier_containerapp" {
-  name      = "webalerts-dev-notifier"
+  name      = var.notifier_app_name
   location  = azurerm_resource_group.rg.location
   parent_id = azurerm_resource_group.rg.id
   type      = "Microsoft.App/containerApps@2022-03-01"
@@ -295,8 +295,7 @@ resource "azapi_resource" "notifier_containerapp" {
               custom = {
                 type = "azure-servicebus"
                 metadata = {
-                  queueName              = azurerm_servicebus_queue.alert.name
-                  activationMessageCount = 1
+                  queueName = azurerm_servicebus_queue.alert.name
                 }
                 auth = [
                   {
@@ -322,7 +321,7 @@ resource "azapi_resource" "notifier_containerapp" {
 resource "azurerm_role_assignment" "scraper_to_sb" {
   scope                = azurerm_servicebus_namespace.webalerts.id
   role_definition_name = "Azure Service Bus Data Owner"
-  principal_id         = azapi_resource.container_app.identity[0].principal_id
+  principal_id         = azapi_resource.scraper_containerapp.identity[0].principal_id
 }
 
 resource "azurerm_role_assignment" "notifier_to_sb" {

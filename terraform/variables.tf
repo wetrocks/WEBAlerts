@@ -63,6 +63,24 @@ variable "appinsights_name" {
   nullable    = false
 }
 
+variable "containerappenv_name" {
+  description = "Name of container apps instance"
+  type        = string
+  nullable    = false
+}
+
+variable "scraper_app_name" {
+  description = "Name of scraper container app"
+  type        = string
+  nullable    = false
+}
+
+variable "notifier_app_name" {
+  description = "Name of notifier container app"
+  type        = string
+  nullable    = false
+}
+
 variable "scrape_url" {
   description = "URL to scrape"
   type        = string
