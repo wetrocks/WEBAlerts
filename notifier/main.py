@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel, BaseSettings
 from structlog import get_logger
 from sendgrid import SendGridAPIClient
+from python_http_client.exceptions import HTTPError
 import json
 
 
@@ -44,6 +45,8 @@ async def handleAlertMsg(alertMsg: AlertMessage):
             sendAlertEmail(alert)
         else:
             logger.warn("Alert not found in database", id=alertMsg.id)
+    except HTTPError as httpe:
+        logger.error("SendGrid API error:", **(httpe.to_dict))
     except Exception as e:
         logger.error("Error processing message", exception=e)
 
