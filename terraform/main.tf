@@ -210,13 +210,37 @@ resource "azapi_resource" "scraper_containerapp" {
           minReplicas = 0
           rules = [
             {
-              name = "noon"
+              name = "morning"
               custom = {
                 type = "cron"
                 metadata = {
                   timezone        = "America/Kralendijk"
-                  start           = "0 12 * * *"
-                  end             = "5 12 * * *"
+                  start           = "0 8 * * *"
+                  end             = "5 8 * * *"
+                  desiredReplicas = "1"
+                }
+              }
+            },
+            {
+              name = "afternoon"
+              custom = {
+                type = "cron"
+                metadata = {
+                  timezone        = "America/Kralendijk"
+                  start           = "0 13 * * *"
+                  end             = "5 13 * * *"
+                  desiredReplicas = "1"
+                }
+              }
+            },
+            {
+              name = "evening"
+              custom = {
+                type = "cron"
+                metadata = {
+                  timezone        = "America/Kralendijk"
+                  start           = "0 19 * * *"
+                  end             = "5 19 * * *"
                   desiredReplicas = "1"
                 }
               }
