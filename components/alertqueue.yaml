@@ -1,0 +1,17 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: alertqueue
+spec:
+  type: bindings.azure.servicebusqueues
+  version: v1
+  initTimeout: 30s
+  metadata:
+  - name: connectionString
+    secretKeyRef: 
+      name: serviceBusConnection
+      key: serviceBusConnection
+  - name: queueName
+    value: sbq-alerts
+auth:
+  secretStore: local-secret-store

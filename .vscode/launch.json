@@ -1,12 +1,55 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Attach to Python Functions",
-            "type": "python",
-            "request": "attach",
-            "port": 9091,
-            "preLaunchTask": "func: host start"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+        "name": "Scraper",
+        "type": "python",
+        "request": "launch",
+        "module": "scraper.alert-scraper",
+        "args": [
+        ],
+        "jinja": true,
+        "justMyCode": true
+    },
+    {
+        "name": "Scraper with Dapr",
+        "type": "python",
+        "request": "launch",
+        "module": "scraper.alert-scraper",
+        "args": [
+        ],
+        "jinja": true,
+        "justMyCode": true,
+        "preLaunchTask": "dapr-debug-scraper",
+        "postDebugTask": "daprd-down-scraper"
+    },
+    {
+        "name": "Python: FastAPI",
+        "type": "python",
+        "request": "launch",
+        "module": "uvicorn",
+        "args": [
+            "notifier.main:app",
+            "--port",
+            "8001"
+        ],
+        "jinja": true,
+        "justMyCode": true
+    },
+    {
+        "name": "Python: FastAPI with Dapr",
+        "type": "python",
+        "request": "launch",
+        "module": "uvicorn",
+        "args": [
+            "notifier.main:app",
+            "--port",
+            "8001"
+        ],
+        "jinja": true,
+        "justMyCode": true,
+        "preLaunchTask": "dapr-debug",
+        "postDebugTask": "daprd-down"
+    }
+]
 }

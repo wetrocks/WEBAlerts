@@ -1,0 +1,55 @@
+name: build-notifier
+run-name: Build notifier container image
+on: 
+  push:
+    paths:
+      - 'common/**'
+      - 'notifier/**'
+      - 'notifier.Dockerfile'
+jobs:
+  BuildTest:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    outputs:
+      short_hash: ${{ steps.commithash.outputs.short_hash }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set short git commit hash
+        id: commithash
+        run: |
+          short_sha=$(git rev-parse --short ${{ github.sha }})
+          echo "short_hash=$short_sha" >> $GITHUB_OUTPUT
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r notifier/requirements.txt
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          flake8 ./notifier --count --statistics --show-source
+  CreateImage:
+    name: Create notifier app image
+    needs: BuildTest
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{needs.BuildTest.outputs.short_hash}}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}  
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          file: notifier.Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/webalerts/notifier:${{ needs.BuildTest.outputs.short_hash }} 
+            ghcr.io/${{ github.repository_owner }}/webalerts/notifier:latest

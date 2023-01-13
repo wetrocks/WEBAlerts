@@ -1,0 +1,5 @@
+fastapi[all]
+pydantic[dotenv]
+structlog
+sendgrid
+azure-cosmos

@@ -1,0 +1,7 @@
+lxml
+requests
+structlog
+azure-cosmos
+dapr
+pydantic
+pydantic[dotenv]
